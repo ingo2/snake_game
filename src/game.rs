@@ -34,7 +34,7 @@ impl From<PlayerDirection> for Vector2<i32> {
 }
 
 pub struct GameContext {
-    pub player_position: Vec<Vector2<i32>>,
+    pub player_position: VecDeque<Vector2<i32>>,
     pub player_direction: PlayerDirection,
     pub food: Vector2<i32>,
     pub state: GameState,
@@ -43,7 +43,7 @@ pub struct GameContext {
 impl GameContext {
     pub fn new() -> GameContext {
         let mut instance = GameContext {
-            player_position: vec![vector![3, 1], vector![2, 1], vector![1, 1]],
+            player_position: VecDeque::from(vec![vector![3, 1], vector![2, 1], vector![1, 1]]),
             player_direction: PlayerDirection::Right,
             state: GameState::Paused,
             food: vector![0, 0],
@@ -54,9 +54,14 @@ impl GameContext {
 
     fn spawn_food(&mut self) {
         let mut rng = rand::thread_rng();
-        let x = rng.gen_range(0..GRID_X_SIZE);
-        let y = rng.gen_range(0..GRID_Y_SIZE);
-        self.food = vector![x, y];
+        loop {
+            let x = rng.gen_range(1..GRID_X_SIZE - 1);
+            let y = rng.gen_range(1..GRID_Y_SIZE - 1);
+            if !self.player_position.contains(&vector![x, y]) {
+                self.food = vector![x, y];
+                break;
+            }
+        }
     }
 
     pub fn next_tick(&mut self) {
@@ -64,17 +69,20 @@ impl GameContext {
             return;
         }
 
-        let head_position = self.player_position.first().unwrap();
+        let head_position = self.player_position.front().unwrap();
         let next_head_position = Vector2::from(self.player_direction) + *head_position;
 
-        if next_head_position == self.food {
-            self.spawn_food();
-        } else {
-            self.player_position.pop();
+        let reached_food = next_head_position == self.food;
+
+        if !reached_food {
+            self.player_position.pop_back();
         }
-        self.player_position.reverse();
-        self.player_position.push(next_head_position);
-        self.player_position.reverse();
+
+        self.player_position.push_front(next_head_position);
+
+        if reached_food {
+            self.spawn_food();
+        }
     }
 
     pub fn move_up(&mut self) {
