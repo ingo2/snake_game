@@ -1,8 +1,8 @@
 extern crate nalgebra as na;
 
-// use core::ops::Add;
 use na::{vector, Vector2};
 use rand::Rng;
+use std::collections::VecDeque;
 
 pub const GRID_X_SIZE: i32 = 40;
 pub const GRID_Y_SIZE: i32 = 30;
@@ -67,17 +67,14 @@ impl GameContext {
         let head_position = self.player_position.first().unwrap();
         let next_head_position = Vector2::from(self.player_direction) + *head_position;
 
-        if self.player_position[0] == self.food {
-            self.player_position.reverse();
-            self.player_position.push(self.food);
-            self.player_position.reverse();
+        if next_head_position == self.food {
             self.spawn_food();
         } else {
             self.player_position.pop();
-            self.player_position.reverse();
-            self.player_position.push(next_head_position);
-            self.player_position.reverse();
         }
+        self.player_position.reverse();
+        self.player_position.push(next_head_position);
+        self.player_position.reverse();
     }
 
     pub fn move_up(&mut self) {
