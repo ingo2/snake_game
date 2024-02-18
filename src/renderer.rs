@@ -1,59 +1,67 @@
 use crate::game::DOT_SIZE_IN_PXLS;
 use crate::game::{GameContext, GameState};
 use nalgebra::Vector2;
-use sdl2::{pixels::Color, rect::Rect, render::WindowCanvas, video::Window};
 
-pub struct Renderer {
-    canvas: WindowCanvas,
-}
+use piston_window::*;
+
+pub struct Renderer {}
 
 impl Renderer {
-    pub fn new(window: Window) -> Result<Renderer, String> {
-        let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
-        Ok(Renderer { canvas })
+    pub fn new() -> Self {
+        Renderer {}
     }
 
-    fn draw_dot(&mut self, point: &Vector2<i32>) -> Result<(), String> {
-        self.canvas.fill_rect(Rect::new(
-            point.x * DOT_SIZE_IN_PXLS,
-            point.y * DOT_SIZE_IN_PXLS,
-            DOT_SIZE_IN_PXLS as u32,
-            DOT_SIZE_IN_PXLS as u32,
-        ))?;
+    pub fn draw(&mut self, game: &GameContext, c: Context, g: &mut G2d) -> Result<(), String> {
+        self.draw_background(game, g);
+        self.draw_player(game, c, g)?;
+        self.draw_food(game, c, g)?;
 
         Ok(())
     }
 
-    pub fn draw(&mut self, context: &GameContext) -> Result<(), String> {
-        self.draw_background(context);
-        self.draw_player(context)?;
-        self.draw_food(context)?;
-        self.canvas.present();
-
-        Ok(())
-    }
-
-    fn draw_background(&mut self, context: &GameContext) {
-        let color = match context.state {
-            GameState::Playing => Color::RGB(0, 0, 0),
-            GameState::Paused => Color::RGB(30, 30, 30),
+    fn draw_background(&mut self, game: &GameContext, g: &mut G2d) {
+        let color = match game.state {
+            GameState::Playing => [0.0, 0.0, 0.0, 1.0],
+            GameState::Paused => [0.1, 0.1, 0.1, 1.0],
         };
-        self.canvas.set_draw_color(color);
-        self.canvas.clear();
+        clear(color, g);
     }
 
-    fn draw_player(&mut self, context: &GameContext) -> Result<(), String> {
-        self.canvas.set_draw_color(Color::GREEN);
-        for point in &context.player_position {
-            self.draw_dot(point)?;
+    fn draw_dot(
+        &mut self,
+        point: &Vector2<i32>,
+        color: [f32; 4],
+        c: Context,
+        g: &mut G2d,
+    ) -> Result<(), String> {
+        rectangle(
+            color,
+            [
+                (point.x * DOT_SIZE_IN_PXLS) as f64,
+                (point.y * DOT_SIZE_IN_PXLS) as f64,
+                DOT_SIZE_IN_PXLS as f64,
+                DOT_SIZE_IN_PXLS as f64,
+            ],
+            c.transform,
+            g,
+        );
+
+        Ok(())
+    }
+
+    fn draw_player(&mut self, game: &GameContext, c: Context, g: &mut G2d) -> Result<(), String> {
+        let green = [0.0, 1.0, 0.0, 1.0];
+        for point in &game.player_position {
+            self.draw_dot(point, green, c, g)?;
         }
 
         Ok(())
     }
 
-    fn draw_food(&mut self, context: &GameContext) -> Result<(), String> {
-        self.canvas.set_draw_color(Color::RED);
-        self.draw_dot(&context.food)?;
+    fn draw_food(&mut self, game: &GameContext, c: Context, g: &mut G2d) -> Result<(), String> {
+        let red = [1.0, 0.0, 0.0, 1.0];
+        self.draw_dot(&game.food, red, c, g)?;
+
         Ok(())
     }
 }
