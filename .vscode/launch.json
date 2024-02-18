@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "debug snake_game",
+            "program": "${workspaceFolder}/target/debug/snake_game",
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
