@@ -4,6 +4,8 @@ use na::{vector, Vector2};
 use rand::Rng;
 use std::collections::VecDeque;
 
+type Vec2i = na::Vector2<i32>;
+
 pub const GRID_X_SIZE: i32 = 40;
 pub const GRID_Y_SIZE: i32 = 30;
 pub const DOT_SIZE_IN_PXLS: i32 = 20;
@@ -22,8 +24,8 @@ pub enum PlayerDirection {
     Left,
 }
 
-impl From<PlayerDirection> for Vector2<i32> {
-    fn from(direction: PlayerDirection) -> Vector2<i32> {
+impl From<PlayerDirection> for Vec2i {
+    fn from(direction: PlayerDirection) -> Vec2i {
         match direction {
             PlayerDirection::Up => vector![0, -1],
             PlayerDirection::Down => vector![0, 1],
@@ -34,9 +36,9 @@ impl From<PlayerDirection> for Vector2<i32> {
 }
 
 pub struct GameContext {
-    pub player_position: VecDeque<Vector2<i32>>,
+    pub player_position: VecDeque<Vec2i>,
     pub player_direction: PlayerDirection,
-    pub food: Vector2<i32>,
+    pub food: Vec2i,
     pub state: GameState,
 }
 
@@ -55,8 +57,8 @@ impl GameContext {
     fn spawn_food(&mut self) {
         let mut rng = rand::thread_rng();
         loop {
-            let x = rng.gen_range(1..GRID_X_SIZE - 1);
-            let y = rng.gen_range(1..GRID_Y_SIZE - 1);
+            let x = rng.gen_range(1..GRID_X_SIZE - 1) as i32;
+            let y = rng.gen_range(1..GRID_Y_SIZE - 1) as i32;
             if !self.player_position.contains(&vector![x, y]) {
                 self.food = vector![x, y];
                 break;

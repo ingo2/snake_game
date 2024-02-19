@@ -8,7 +8,7 @@ use game::{DOT_SIZE_IN_PXLS, GRID_X_SIZE, GRID_Y_SIZE};
 use piston_window::*;
 use renderer::Renderer;
 
-const DESIRED_FRAME_RATE: u64 = 60;
+const DESIRED_UPDATE_RATE: u64 = 60;
 
 fn main() {
     let mut window: PistonWindow = WindowSettings::new(
@@ -22,35 +22,52 @@ fn main() {
     .build()
     .unwrap_or_else(|e| panic!("Failed to build PistonWindow: {}", e));
 
-    window.set_ups(DESIRED_FRAME_RATE);
+    window.set_ups(DESIRED_UPDATE_RATE);
 
     let mut game = GameContext::new();
     let mut renderer = Renderer::new();
     let mut frame_counter = 0;
 
     while let Some(event) = window.next() {
-        if let Some(Button::Keyboard(key)) = event.press_args() {
-            match key {
-                Key::W => game.move_up(),
-                Key::A => game.move_left(),
-                Key::S => game.move_down(),
-                Key::D => game.move_right(),
-                Key::Space => game.toggle_pause(),
-                _ => {} // Ignore all other keys.
+        match event {
+            // Handle keyboard input.
+            Event::Input(
+                Input::Button(ButtonArgs {
+                    state: ButtonState::Press,
+                    button: Button::Keyboard(key),
+                    ..
+                }),
+                ..,
+            ) => {
+                match key {
+                    Key::W => game.move_up(),
+                    Key::A => game.move_left(),
+                    Key::S => game.move_down(),
+                    Key::D => game.move_right(),
+                    Key::Space => game.toggle_pause(),
+                    _ => {} // Ignore all other keys.
+                }
             }
+
+            // Handle updates.
+            Event::Loop(Loop::Update(_)) => {
+                frame_counter += 1;
+                if frame_counter % 15 == 0 {
+                    game.next_tick();
+                }
+            }
+
+            // Handle rendering.
+            Event::Loop(Loop::Render(_)) => {
+                window.draw_2d(&event, |c, g, _| {
+                    if let Err(e) = renderer.draw(&game, c, g) {
+                        println!("Error rendering: {}", e);
+                    }
+                });
+            }
+
+            // Ignore everything else.
+            _ => {}
         }
-
-        window.draw_2d(&event, |c, g, _| {
-            // TODO: Updating state should be decoupled from drawing.
-            frame_counter += 1;
-            if (frame_counter % 15) == 0 {
-                game.next_tick();
-            }
-
-            match renderer.draw(&game, c, g) {
-                Ok(_) => {}
-                Err(e) => println!("Error rendering: {}", e),
-            }
-        });
     }
 }

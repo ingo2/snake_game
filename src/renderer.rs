@@ -1,8 +1,9 @@
 use crate::game::DOT_SIZE_IN_PXLS;
 use crate::game::{GameContext, GameState};
-use nalgebra::Vector2;
 
 use piston_window::*;
+
+type Vec2i = nalgebra::Vector2<i32>;
 
 pub struct Renderer {}
 
@@ -29,19 +30,17 @@ impl Renderer {
 
     fn draw_dot(
         &mut self,
-        point: &Vector2<i32>,
+        point: &Vec2i,
         color: [f32; 4],
         c: Context,
         g: &mut G2d,
     ) -> Result<(), String> {
+        let x = (point.x * DOT_SIZE_IN_PXLS) as f64;
+        let y = (point.y * DOT_SIZE_IN_PXLS) as f64;
+
         rectangle(
             color,
-            [
-                (point.x * DOT_SIZE_IN_PXLS) as f64,
-                (point.y * DOT_SIZE_IN_PXLS) as f64,
-                DOT_SIZE_IN_PXLS as f64,
-                DOT_SIZE_IN_PXLS as f64,
-            ],
+            [x, y, DOT_SIZE_IN_PXLS as f64, DOT_SIZE_IN_PXLS as f64],
             c.transform,
             g,
         );
