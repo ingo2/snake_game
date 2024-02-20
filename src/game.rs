@@ -57,8 +57,8 @@ impl GameContext {
     fn spawn_food(&mut self) {
         let mut rng = rand::thread_rng();
         loop {
-            let x = rng.gen_range(1..GRID_X_SIZE - 1) as i32;
-            let y = rng.gen_range(1..GRID_Y_SIZE - 1) as i32;
+            let x = rng.gen_range(1..GRID_X_SIZE - 1);
+            let y = rng.gen_range(1..GRID_Y_SIZE - 1);
             if !self.player_position.contains(&vector![x, y]) {
                 self.food = vector![x, y];
                 break;

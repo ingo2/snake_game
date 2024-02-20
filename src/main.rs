@@ -40,15 +40,14 @@ fn main() {
                 ..,
             ) => {
                 match key {
-                    Key::W => game.move_up(),
-                    Key::A => game.move_left(),
-                    Key::S => game.move_down(),
-                    Key::D => game.move_right(),
+                    Key::W | Key::Up => game.move_up(),
+                    Key::A | Key::Left => game.move_left(),
+                    Key::S | Key::Down => game.move_down(),
+                    Key::D | Key::Right => game.move_right(),
                     Key::Space => game.toggle_pause(),
                     _ => {} // Ignore all other keys.
                 }
             }
-
             // Handle updates.
             Event::Loop(Loop::Update(_)) => {
                 frame_counter += 1;
@@ -56,18 +55,15 @@ fn main() {
                     game.next_tick();
                 }
             }
-
-            // Handle rendering.
-            Event::Loop(Loop::Render(_)) => {
-                window.draw_2d(&event, |c, g, _| {
-                    if let Err(e) = renderer.draw(&game, c, g) {
-                        println!("Error rendering: {}", e);
-                    }
-                });
-            }
-
             // Ignore everything else.
             _ => {}
         }
+
+        // Handle rendering.
+        window.draw_2d(&event, |c, g, _| {
+            if let Err(e) = renderer.draw(&game, c, g) {
+                println!("Error rendering: {}", e);
+            }
+        });
     }
 }
