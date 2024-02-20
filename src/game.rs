@@ -6,9 +6,9 @@ use std::collections::VecDeque;
 
 type Vec2i = na::Vector2<i32>;
 
-pub const GRID_X_SIZE: i32 = 40;
-pub const GRID_Y_SIZE: i32 = 30;
-pub const DOT_SIZE_IN_PXLS: i32 = 20;
+pub const GRID_X_SIZE: i32 = 35;
+pub const GRID_Y_SIZE: i32 = 25;
+pub const DOT_SIZE_IN_PXLS: i32 = 15;
 
 #[derive(Copy, Clone)]
 pub enum GameState {
@@ -45,13 +45,20 @@ pub struct GameContext {
 impl GameContext {
     pub fn new() -> GameContext {
         let mut instance = GameContext {
-            snake_segments: VecDeque::from(vec![vector![3, 1], vector![2, 1], vector![1, 1]]),
+            snake_segments: VecDeque::new(),
             snake_direction: SnakeDirection::Right,
             state: GameState::Paused,
             food: vector![0, 0],
         };
-        instance.spawn_food();
+        instance.start();
         instance
+    }
+
+    fn start(&mut self) {
+        self.snake_segments = VecDeque::from(vec![vector![3, 1], vector![2, 1], vector![1, 1]]);
+        self.snake_direction = SnakeDirection::Right;
+        self.state = GameState::Paused;
+        self.spawn_food();
     }
 
     fn spawn_food(&mut self) {
@@ -66,6 +73,21 @@ impl GameContext {
         }
     }
 
+    fn check_game_over(&self, next_head_position: &Vec2i) -> bool {
+        let x = next_head_position.x;
+        let y = next_head_position.y;
+
+        if x < 0 || x >= GRID_X_SIZE || y < 0 || y >= GRID_Y_SIZE {
+            return true;
+        }
+
+        if self.is_snake_segment(&vector![x, y]) {
+            return true;
+        }
+
+        false
+    }
+
     pub fn next_tick(&mut self) {
         if let GameState::Paused = self.state {
             return;
@@ -75,9 +97,13 @@ impl GameContext {
         let next_head_position = head_position + Vector2::from(self.snake_direction);
 
         let reached_food = next_head_position == self.food;
-
         if !reached_food {
             self.snake_segments.pop_back();
+        }
+
+        if self.check_game_over(&next_head_position) {
+            self.start();
+            return;
         }
 
         self.snake_segments.push_front(next_head_position);
