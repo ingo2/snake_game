@@ -50,7 +50,7 @@ impl Renderer {
 
     fn draw_player(&mut self, game: &GameContext, c: Context, g: &mut G2d) -> Result<(), String> {
         let green = [0.0, 1.0, 0.0, 1.0];
-        for point in &game.player_position {
+        for point in &game.snake_segments {
             self.draw_dot(point, green, c, g)?;
         }
 

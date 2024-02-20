@@ -17,27 +17,27 @@ pub enum GameState {
 }
 
 #[derive(Copy, Clone)]
-pub enum PlayerDirection {
+pub enum SnakeDirection {
     Up,
     Down,
     Right,
     Left,
 }
 
-impl From<PlayerDirection> for Vec2i {
-    fn from(direction: PlayerDirection) -> Vec2i {
+impl From<SnakeDirection> for Vec2i {
+    fn from(direction: SnakeDirection) -> Vec2i {
         match direction {
-            PlayerDirection::Up => vector![0, -1],
-            PlayerDirection::Down => vector![0, 1],
-            PlayerDirection::Right => vector![1, 0],
-            PlayerDirection::Left => vector![-1, 0],
+            SnakeDirection::Up => vector![0, -1],
+            SnakeDirection::Down => vector![0, 1],
+            SnakeDirection::Right => vector![1, 0],
+            SnakeDirection::Left => vector![-1, 0],
         }
     }
 }
 
 pub struct GameContext {
-    pub player_position: VecDeque<Vec2i>,
-    pub player_direction: PlayerDirection,
+    pub snake_segments: VecDeque<Vec2i>,
+    pub snake_direction: SnakeDirection,
     pub food: Vec2i,
     pub state: GameState,
 }
@@ -45,8 +45,8 @@ pub struct GameContext {
 impl GameContext {
     pub fn new() -> GameContext {
         let mut instance = GameContext {
-            player_position: VecDeque::from(vec![vector![3, 1], vector![2, 1], vector![1, 1]]),
-            player_direction: PlayerDirection::Right,
+            snake_segments: VecDeque::from(vec![vector![3, 1], vector![2, 1], vector![1, 1]]),
+            snake_direction: SnakeDirection::Right,
             state: GameState::Paused,
             food: vector![0, 0],
         };
@@ -59,7 +59,7 @@ impl GameContext {
         loop {
             let x = rng.gen_range(1..GRID_X_SIZE - 1);
             let y = rng.gen_range(1..GRID_Y_SIZE - 1);
-            if !self.player_position.contains(&vector![x, y]) {
+            if !self.snake_segments.contains(&vector![x, y]) {
                 self.food = vector![x, y];
                 break;
             }
@@ -71,36 +71,55 @@ impl GameContext {
             return;
         }
 
-        let head_position = self.player_position.front().unwrap();
-        let next_head_position = Vector2::from(self.player_direction) + *head_position;
+        let head_position = self.snake_segments.front().unwrap();
+        let next_head_position = head_position + Vector2::from(self.snake_direction);
 
         let reached_food = next_head_position == self.food;
 
         if !reached_food {
-            self.player_position.pop_back();
+            self.snake_segments.pop_back();
         }
 
-        self.player_position.push_front(next_head_position);
+        self.snake_segments.push_front(next_head_position);
 
         if reached_food {
             self.spawn_food();
         }
     }
 
+    fn is_snake_segment(&self, point: &Vec2i) -> bool {
+        self.snake_segments.contains(point)
+    }
+
+    fn illegal_move(&self, dir: SnakeDirection) -> bool {
+        // This prevents the snake from reversing direction into itself.
+        let head_position = self.snake_segments.front().unwrap();
+        let next_head_position = head_position + Vector2::from(dir);
+        self.is_snake_segment(&next_head_position)
+    }
+
     pub fn move_up(&mut self) {
-        self.player_direction = PlayerDirection::Up;
+        if !self.illegal_move(SnakeDirection::Up) {
+            self.snake_direction = SnakeDirection::Up;
+        }
     }
 
     pub fn move_down(&mut self) {
-        self.player_direction = PlayerDirection::Down;
+        if !self.illegal_move(SnakeDirection::Down) {
+            self.snake_direction = SnakeDirection::Down;
+        }
     }
 
     pub fn move_right(&mut self) {
-        self.player_direction = PlayerDirection::Right;
+        if !self.illegal_move(SnakeDirection::Right) {
+            self.snake_direction = SnakeDirection::Right;
+        }
     }
 
     pub fn move_left(&mut self) {
-        self.player_direction = PlayerDirection::Left;
+        if !self.illegal_move(SnakeDirection::Left) {
+            self.snake_direction = SnakeDirection::Left;
+        }
     }
 
     pub fn toggle_pause(&mut self) {
