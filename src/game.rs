@@ -35,20 +35,24 @@ impl From<SnakeDirection> for Vec2i {
     }
 }
 
-pub struct GameContext {
+pub struct Game {
     pub snake_segments: VecDeque<Vec2i>,
     pub snake_direction: SnakeDirection,
     pub food: Vec2i,
     pub state: GameState,
+    pub score: u32,
+    pub high_score: u32,
 }
 
-impl GameContext {
-    pub fn new() -> GameContext {
-        let mut instance = GameContext {
+impl Game {
+    pub fn new() -> Game {
+        let mut instance = Game {
             snake_segments: VecDeque::new(),
             snake_direction: SnakeDirection::Right,
             state: GameState::Paused,
             food: vector![0, 0],
+            score: 0,
+            high_score: 0,
         };
         instance.start();
         instance
@@ -58,6 +62,7 @@ impl GameContext {
         self.snake_segments = VecDeque::from(vec![vector![3, 2], vector![2, 2], vector![1, 2]]);
         self.snake_direction = SnakeDirection::Right;
         self.state = GameState::Paused;
+        self.score = 0;
         self.spawn_food();
     }
 
@@ -74,6 +79,7 @@ impl GameContext {
     }
 
     fn check_game_over(&self, next_head_position: &Vec2i) -> bool {
+        // If the snake goes out of bounds or hits itself, the game is over.
         let x = next_head_position.x;
         let y = next_head_position.y;
 
@@ -93,6 +99,9 @@ impl GameContext {
             return;
         }
 
+        // To create the illusion of movement, we add a new head segment in the direction of travel
+        // and remove the last segment. If the new head segment is on the food, we don't remove the
+        // last segment, effectively increasing the length of the snake by one.
         let head_position = self.snake_segments.front().unwrap();
         let next_head_position = head_position + Vector2::from(self.snake_direction);
 
@@ -110,6 +119,10 @@ impl GameContext {
 
         if reached_food {
             self.spawn_food();
+            self.score += 1;
+            if self.score > self.high_score {
+                self.high_score = self.score;
+            }
         }
     }
 
