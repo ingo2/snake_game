@@ -55,7 +55,7 @@ impl GameContext {
     }
 
     fn start(&mut self) {
-        self.snake_segments = VecDeque::from(vec![vector![3, 1], vector![2, 1], vector![1, 1]]);
+        self.snake_segments = VecDeque::from(vec![vector![3, 2], vector![2, 2], vector![1, 2]]);
         self.snake_direction = SnakeDirection::Right;
         self.state = GameState::Paused;
         self.spawn_food();

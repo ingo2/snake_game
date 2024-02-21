@@ -12,7 +12,7 @@ impl Renderer {
         Renderer {}
     }
 
-    pub fn draw(&mut self, game: &GameContext, c: Context, g: &mut G2d) -> Result<(), String> {
+    pub fn draw(&mut self, game: &GameContext, c: &Context, g: &mut G2d) -> Result<(), String> {
         self.draw_background(game, g);
         self.draw_player(game, c, g)?;
         self.draw_food(game, c, g)?;
@@ -25,6 +25,7 @@ impl Renderer {
             GameState::Playing => [0.0, 0.0, 0.0, 1.0],
             GameState::Paused => [0.1, 0.1, 0.1, 1.0],
         };
+
         clear(color, g);
     }
 
@@ -32,7 +33,7 @@ impl Renderer {
         &mut self,
         point: &Vec2i,
         color: [f32; 4],
-        c: Context,
+        c: &Context,
         g: &mut G2d,
     ) -> Result<(), String> {
         let x = (point.x * DOT_SIZE_IN_PXLS) as f64;
@@ -48,8 +49,8 @@ impl Renderer {
         Ok(())
     }
 
-    fn draw_player(&mut self, game: &GameContext, c: Context, g: &mut G2d) -> Result<(), String> {
-        let green = [0.0, 1.0, 0.0, 1.0];
+    fn draw_player(&mut self, game: &GameContext, c: &Context, g: &mut G2d) -> Result<(), String> {
+        let green = [0.1, 0.65, 0.1, 1.0];
         for point in &game.snake_segments {
             self.draw_dot(point, green, c, g)?;
         }
@@ -57,8 +58,8 @@ impl Renderer {
         Ok(())
     }
 
-    fn draw_food(&mut self, game: &GameContext, c: Context, g: &mut G2d) -> Result<(), String> {
-        let red = [1.0, 0.0, 0.0, 1.0];
+    fn draw_food(&mut self, game: &GameContext, c: &Context, g: &mut G2d) -> Result<(), String> {
+        let red = [0.85, 0.1, 0.1, 1.0];
         self.draw_dot(&game.food, red, c, g)?;
 
         Ok(())
