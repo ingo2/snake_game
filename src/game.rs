@@ -40,6 +40,8 @@ pub struct Game {
     pub snake_direction: SnakeDirection,
     pub food: Vec2i,
     pub state: GameState,
+    pub tick_counter: u32,
+    pub tick_rate: u32,
     pub score: u32,
     pub high_score: u32,
 }
@@ -50,6 +52,8 @@ impl Game {
             snake_segments: VecDeque::new(),
             snake_direction: SnakeDirection::Right,
             state: GameState::Paused,
+            tick_counter: 0,
+            tick_rate: 15,
             food: vector![0, 0],
             score: 0,
             high_score: 0,
@@ -79,7 +83,6 @@ impl Game {
     }
 
     fn check_game_over(&self, next_head_position: &Vec2i) -> bool {
-        // If the snake goes out of bounds or hits itself, the game is over.
         let x = next_head_position.x;
         let y = next_head_position.y;
 
@@ -99,6 +102,14 @@ impl Game {
             return;
         }
 
+        // The tick rate determines how fast the snake moves. The higher the tick 
+        // rate, the slower the snake moves.
+        self.tick_counter += 1;
+        if self.tick_counter % self.tick_rate != 0 {
+            return;
+        }
+        self.tick_counter = 0;
+
         // To create the illusion of movement, we add a new head segment in the direction of travel
         // and remove the last segment. If the new head segment is on the food, we don't remove the
         // last segment, effectively increasing the length of the snake by one.
@@ -110,6 +121,7 @@ impl Game {
             self.snake_segments.pop_back();
         }
 
+        // If the snake goes out of bounds or hits itself, the game is over.
         if self.check_game_over(&next_head_position) {
             self.start();
             return;
@@ -122,6 +134,11 @@ impl Game {
             self.score += 1;
             if self.score > self.high_score {
                 self.high_score = self.score;
+            }
+
+            // Increase the speed of the snake every 3 points.
+            if self.score % 3 == 0 && self.tick_rate > 5 {
+                self.tick_rate -= 1;
             }
         }
     }

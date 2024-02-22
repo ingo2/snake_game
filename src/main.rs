@@ -31,8 +31,6 @@ fn main() {
         .init(&mut window)
         .unwrap_or_else(|e| panic!("Failed to initialize renderer: {}", e));
 
-    let mut frame_counter = 0;
-
     while let Some(event) = window.next() {
         match event {
             // Handle keyboard input.
@@ -55,10 +53,7 @@ fn main() {
             }
             // Handle updates.
             Event::Loop(Loop::Update(_)) => {
-                frame_counter += 1;
-                if frame_counter % 15 == 0 {
-                    game.next_tick();
-                }
+                game.next_tick();
             }
             // Ignore everything else.
             _ => {}
