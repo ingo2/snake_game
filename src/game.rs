@@ -1,10 +1,6 @@
-extern crate nalgebra as na;
-
-use na::{vector, Vector2};
+use nalgebra::{vector, Vector2};
 use rand::Rng;
 use std::collections::VecDeque;
-
-type Vec2i = na::Vector2<i32>;
 
 pub const GRID_X_SIZE: i32 = 35;
 pub const GRID_Y_SIZE: i32 = 25;
@@ -24,8 +20,8 @@ pub enum SnakeDirection {
     Left,
 }
 
-impl From<SnakeDirection> for Vec2i {
-    fn from(direction: SnakeDirection) -> Vec2i {
+impl From<SnakeDirection> for Vector2<i32> {
+    fn from(direction: SnakeDirection) -> Vector2<i32> {
         match direction {
             SnakeDirection::Up => vector![0, -1],
             SnakeDirection::Down => vector![0, 1],
@@ -36,9 +32,9 @@ impl From<SnakeDirection> for Vec2i {
 }
 
 pub struct Game {
-    pub snake_segments: VecDeque<Vec2i>,
+    pub snake_segments: VecDeque<Vector2<i32>>,
     pub snake_direction: SnakeDirection,
-    pub food: Vec2i,
+    pub food: Vector2<i32>,
     pub state: GameState,
     pub tick_counter: u32,
     pub tick_rate: u32,
@@ -82,7 +78,7 @@ impl Game {
         }
     }
 
-    fn check_game_over(&self, next_head_position: &Vec2i) -> bool {
+    fn check_game_over(&self, next_head_position: &Vector2<i32>) -> bool {
         let x = next_head_position.x;
         let y = next_head_position.y;
 
@@ -102,7 +98,7 @@ impl Game {
             return;
         }
 
-        // The tick rate determines how fast the snake moves. The higher the tick 
+        // The tick rate determines how fast the snake moves. The higher the tick
         // rate, the slower the snake moves.
         self.tick_counter += 1;
         if self.tick_counter % self.tick_rate != 0 {
@@ -143,7 +139,7 @@ impl Game {
         }
     }
 
-    fn is_snake_segment(&self, point: &Vec2i) -> bool {
+    fn is_snake_segment(&self, point: &Vector2<i32>) -> bool {
         self.snake_segments.contains(point)
     }
 

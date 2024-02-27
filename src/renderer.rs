@@ -1,9 +1,8 @@
 use crate::game::DOT_SIZE_IN_PXLS;
 use crate::game::{Game, GameState};
 
+use nalgebra::Vector2;
 use piston_window::*;
-
-type Vec2i = nalgebra::Vector2<i32>;
 
 const FOOD_COLOR: [f32; 4] = [0.85, 0.1, 0.1, 1.0];
 const SNAKE_COLOR: [f32; 4] = [0.1, 0.65, 0.1, 1.0];
@@ -82,7 +81,7 @@ impl Renderer {
 
     fn draw_dot(
         &mut self,
-        point: &Vec2i,
+        point: &Vector2<i32>,
         color: [f32; 4],
         c: &Context,
         g: &mut G2d,

@@ -1,8 +1,6 @@
 mod game;
 mod renderer;
 
-extern crate piston_window;
-
 use game::Game;
 use game::{DOT_SIZE_IN_PXLS, GRID_X_SIZE, GRID_Y_SIZE};
 use piston_window::*;
